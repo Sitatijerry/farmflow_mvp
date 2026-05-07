@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: farmflow-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: farmflow
+      MYSQL_USER: farmflow_user
+      MYSQL_PASSWORD: farmflow_password_123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - farmflow-network
+
+  # Optional: phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: farmflow-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: farmflow_user
+      PMA_PASSWORD: farmflow_password_123
+      PMA_ROOT_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - farmflow-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  farmflow-network:
+    driver: bridge
